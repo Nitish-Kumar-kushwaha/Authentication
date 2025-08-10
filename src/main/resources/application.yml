@@ -1,33 +1,21 @@
-server:
-  port: 8080
+# Main application configuration
+# Profile-specific configurations are in separate files:
+# - application-dev.yml (development)
+# - application-prod.yml (production) 
+# - application-test.yml (testing)
 
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   application:
-    name: authentication
-  datasource:
-    url: jdbc:postgresql://localhost:5432/practise_development
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-        hibernate:
-            format_sql: true
-            use_sql_comments: true
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-  output:
-    ansi:
-      enabled: ALWAYS
-jwt:
-  secret: 84d7b739ede26cb0330e874d747a02eae9f8e85b952272fe617c4d01bae21264
-  access-token-minutes: 15
-  issuer: auth-service
+    name: ${APPLICATION_NAME:authentication}
 
+# Common JWT configuration that applies to all profiles
+jwt:
+  access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:15}
+  issuer: ${JWT_ISSUER:auth-service}
+
+# Global logging configuration that can be overridden by profiles
 logging:
-  pattern:
-    console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %clr(%m%n){blue}"
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}

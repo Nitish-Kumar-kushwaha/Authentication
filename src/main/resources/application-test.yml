@@ -1,0 +1,42 @@
+# Test Profile Configuration
+# Optimized for testing with in-memory H2 database and minimal logging
+
+server:
+  port: ${SERVER_PORT:0}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    driver-class-name: ${DATABASE_DRIVER:org.h2.Driver}
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${FORMAT_SQL:false}
+        use_sql_comments: ${USE_SQL_COMMENTS:false}
+  h2:
+    console:
+      enabled: ${H2_CONSOLE_ENABLED:true}
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+  output:
+    ansi:
+      enabled: ${ANSI_ENABLED:NEVER}
+
+# JWT configuration specific to testing
+jwt:
+  secret: ${JWT_SECRET:test-secret-key-for-testing-purposes-only}
+
+# Test-specific logging configuration
+logging:
+  level:
+    com.security.authentication: ${LOG_LEVEL_AUTH:WARN}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE:WARN}
+    root: ${LOG_LEVEL_ROOT:WARN}
+  pattern:
+    console: ${LOG_PATTERN_CONSOLE:"%d{HH:mm:ss} - %msg%n"} 

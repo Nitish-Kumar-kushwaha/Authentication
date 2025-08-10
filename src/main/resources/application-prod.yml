@@ -1,0 +1,44 @@
+# Production Profile Configuration
+# Optimized for production deployment with minimal logging and file-based logging
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/practise_production}
+    driver-class-name: ${DATABASE_DRIVER:org.postgresql.Driver}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${FORMAT_SQL:false}
+        use_sql_comments: ${USE_SQL_COMMENTS:false}
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
+  output:
+    ansi:
+      enabled: ${ANSI_ENABLED:NEVER}
+
+# JWT configuration specific to production
+jwt:
+  secret: ${JWT_SECRET:84d7b739ede26cb0330e874d747a02eae9f8e85b952272fe617c4d01bae21264}
+
+# Production-specific logging configuration
+logging:
+  level:
+    com.security.authentication: ${LOG_LEVEL_AUTH:INFO}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE:WARN}
+    root: ${LOG_LEVEL_ROOT:WARN}
+  pattern:
+    console: ${LOG_PATTERN_CONSOLE:"%d{yyyy-MM-dd HH:mm:ss} - %msg%n"}
+  file:
+    name: ${LOG_FILE_NAME:logs/application.log}
+    max-size: ${LOG_FILE_MAX_SIZE:10MB}
+    max-history: ${LOG_FILE_MAX_HISTORY:30} 

@@ -1,0 +1,40 @@
+# Development Profile Configuration
+# This is the default profile when no specific profile is selected
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/practise_development}
+    driver-class-name: ${DATABASE_DRIVER:org.postgresql.Driver}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: ${FORMAT_SQL:true}
+        use_sql_comments: ${USE_SQL_COMMENTS:true}
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
+  output:
+    ansi:
+      enabled: ${ANSI_ENABLED:ALWAYS}
+
+# JWT configuration specific to development
+jwt:
+  secret: ${JWT_SECRET:84d7b739ede26cb0330e874d747a02eae9f8e85b952272fe617c4d01bae21264}
+
+# Development-specific logging configuration
+logging:
+  level:
+    com.security.authentication: ${LOG_LEVEL_AUTH:DEBUG}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE:DEBUG}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_HIBERNATE_BINDER:TRACE}
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %clr(%m%n){blue}" 
