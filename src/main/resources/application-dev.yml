@@ -29,6 +29,11 @@ spring:
 jwt:
   secret: ${JWT_SECRET:84d7b739ede26cb0330e874d747a02eae9f8e85b952272fe617c4d01bae21264}
 
+gemini:
+  api:
+    key: ${GEMINI_SECRET_KEY:''}
+    base-url: ${GEMINI_BASE_URL:''}
+
 # Development-specific logging configuration
 logging:
   level:
