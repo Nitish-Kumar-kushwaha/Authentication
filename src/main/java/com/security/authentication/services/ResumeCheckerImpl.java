@@ -60,7 +60,7 @@ public class ResumeCheckerImpl implements IResumeChecker{
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(JsonNode.class)
-                    .timeout(java.time.Duration.ofSeconds(10))
+                    .timeout(java.time.Duration.ofSeconds(30))
                     .block();
 
             log.info("Response: {}", response);
@@ -83,4 +83,6 @@ public class ResumeCheckerImpl implements IResumeChecker{
             throw new Exception("Failed to read the file content");
         }
     }
+
+
 }
