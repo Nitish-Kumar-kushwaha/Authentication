@@ -43,10 +43,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests( auth -> auth.requestMatchers(
                         "/api/v1/auth/login",
                         "/api/v1/auth/register",
-                        "/api/v1/auth/refresh-token"
+                        "/api/v1/auth/refresh-token",
+                        "/*.html",
+                        "/*.css",
+                        "/*.js"
                 ).permitAll().anyRequest().authenticated())
                 .authenticationProvider(provider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 //                .logout(logout -> logout.logoutUrl("/api/v1/auth/logout")
 //                        .invalidateHttpSession(true)
 //                        .clearAuthentication(true)
@@ -55,7 +58,6 @@ public class SecurityConfig {
 //                            response.setStatus(200);
 //                            response.getWriter().write("Logout successful");
 //                        }))
-                .httpBasic(Customizer.withDefaults());
         return http.build();
     }
 

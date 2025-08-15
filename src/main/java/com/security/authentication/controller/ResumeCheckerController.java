@@ -36,6 +36,7 @@ public class ResumeCheckerController {
      */
     @PostMapping("/check-score")
     ResponseEntity<?> checkResumeScore(@RequestParam("resume") MultipartFile resumeFile) {
+        log.info("=== RESUME CHECKER CONTROLLER CALLED ===");
         log.info("=== RESUME CHECKER API CALL STARTED ===");
         log.info("Received resume file: {} ({} bytes)", 
                 resumeFile.getOriginalFilename(), resumeFile.getSize());
@@ -61,6 +62,8 @@ public class ResumeCheckerController {
             return ResponseEntity.ok(responseDTO);
             
         } catch (Exception e) {
+            log.error("=== RESUME CHECKER CONTROLLER ERROR ===");
+            log.error("Error: {}", e.getMessage());
             log.error("=== RESUME CHECKER API CALL FAILED ===");
             log.error("Error in resume checker controller. File: {} ({} bytes). Error: {}", 
                     resumeFile.getOriginalFilename(), resumeFile.getSize(), e.getMessage(), e);

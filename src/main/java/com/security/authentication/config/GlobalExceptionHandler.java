@@ -65,18 +65,19 @@ public class GlobalExceptionHandler {
         return ResponseFactory.error(HttpStatus.NOT_FOUND, "User not found", List.of(safeMessage(ex)), request.getRequestURI());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
-        return ResponseFactory.error(HttpStatus.BAD_REQUEST, "Bad request", List.of(safeMessage(ex)), request.getRequestURI());
-    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneric(Exception ex, HttpServletRequest request) {
-        return ResponseFactory.error(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", List.of("Unexpected error occurred"), request.getRequestURI());
+        // Simple: just return the actual error message for debugging
+        String errorMessage = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+        return ResponseFactory.error(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, List.of(errorMessage), request.getRequestURI());
     }
 
     private String safeMessage(Throwable ex) {
         return ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
     }
+    
+
 }
 
