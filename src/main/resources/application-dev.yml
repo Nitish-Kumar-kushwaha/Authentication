@@ -1,5 +1,13 @@
 # Development Profile Configuration
 # This is the default profile when no specific profile is selected
+# 
+# NOTE: SQL query logging has been disabled to reduce log noise.
+# To re-enable SQL logging, uncomment the following lines:
+# - show-sql: true
+# - format_sql: true  
+# - use_sql_comments: true
+# - org.hibernate.SQL: DEBUG
+# - org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 server:
   port: ${SERVER_PORT:8080}
@@ -13,11 +21,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:update}
-    show-sql: ${SHOW_SQL:true}
+    # SQL Logging - Commented out to hide SQL queries
+    # show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
-        format_sql: ${FORMAT_SQL:true}
-        use_sql_comments: ${USE_SQL_COMMENTS:true}
+        # SQL Formatting - Commented out to hide SQL queries
+        # format_sql: ${FORMAT_SQL:true}
+        # use_sql_comments: ${USE_SQL_COMMENTS:true}
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
     locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
@@ -39,7 +49,8 @@ logging:
   level:
     com.security.authentication: ${LOG_LEVEL_AUTH:DEBUG}
     org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
-    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE:DEBUG}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_HIBERNATE_BINDER:TRACE}
+    # SQL Query Logging - Commented out to hide SQL queries
+    # org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE:DEBUG}
+    # org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_HIBERNATE_BINDER:TRACE}
   pattern:
     console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %clr(%m%n){blue}" 

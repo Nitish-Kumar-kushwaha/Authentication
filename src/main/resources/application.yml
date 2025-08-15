@@ -25,3 +25,6 @@ jwt:
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
+    # SQL Query Logging - Commented out globally to hide SQL queries
+    # org.hibernate.SQL: OFF
+    # org.hibernate.type.descriptor.sql.BasicBinder: OFF

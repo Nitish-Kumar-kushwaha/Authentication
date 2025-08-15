@@ -3,6 +3,7 @@ package com.security.authentication.security;
 import com.security.authentication.repository.RevokedTokenRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class JwtService {
 
     private final String issuer;
@@ -60,6 +62,7 @@ public class JwtService {
             Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
+            log.debug("JWT validation failed: {}", e.getMessage());
             return false;
         }
     }
@@ -75,7 +78,9 @@ public class JwtService {
 
     public boolean isTokenRevoked(String token) {
         String tokenId = getTokenId(token);
-        return tokenId != null && revokedTokenRepository.isTokenRevoked(tokenId);
+        boolean revoked = tokenId != null && revokedTokenRepository.isTokenRevoked(tokenId);
+        log.debug("Token revocation check - ID: {}, Revoked: {}", tokenId, revoked);
+        return revoked;
     }
 
     public boolean isValidAndNotRevoked(String token) {

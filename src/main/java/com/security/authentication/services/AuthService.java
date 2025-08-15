@@ -12,6 +12,7 @@ import com.security.authentication.repository.RefreshTokenRepository;
 import com.security.authentication.repository.RevokedTokenRepository;
 import com.security.authentication.repository.UserAccountRepository;
 import com.security.authentication.security.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class AuthService {
     private final UserAccountRepository userRepository;
     private final AdminUserRepository adminUserRepository;
@@ -177,24 +179,49 @@ public class AuthService {
     }
 
     public Refresh.RefreshResponseDTO newAccessTokenFromRefresh(String refreshToken) {
-        RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new UsernameNotFoundException("Refresh token not found"));
+        log.info("=== REFRESH TOKEN REQUEST ===");
+        log.debug("Refresh token: {}", refreshToken);
+        
+        try {
+            RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
+                    .orElseThrow(() -> new UsernameNotFoundException("Refresh token not found"));
+            
+            log.info("Found refresh token in database");
+            log.debug("Token revoked: {}", rt.isRevoked());
+            log.debug("Token expires at: {}", rt.getExpiresAt());
+            log.debug("Current time: {}", Instant.now());
+            log.debug("Is expired: {}", rt.getExpiresAt().toInstant().isBefore(Instant.now()));
 
-        if (rt.isRevoked() || rt.getExpiresAt().toInstant().isBefore(Instant.now())) {
-            throw new IllegalArgumentException("Refresh token expired or revoked");
+            if (rt.isRevoked() || rt.getExpiresAt().toInstant().isBefore(Instant.now())) {
+                log.warn("Refresh token is expired or revoked");
+                throw new IllegalArgumentException("Refresh token expired or revoked");
+            }
+
+            // Build identifier used by JwtService and UserDetailsService
+            String identifier;
+            if (rt.getAdminUser() != null) {
+                identifier = rt.getAdminUser().getUsername() + ":admin_user";
+                log.debug("Admin user: {}", rt.getAdminUser().getUsername());
+            } else {
+                identifier = rt.getUsers().getUsername() + ":user";
+                log.debug("Regular user: {}", rt.getUsers().getUsername());
+            }
+            
+            log.debug("Generated identifier: {}", identifier);
+
+            String access = jwtService.generateAccessToken(identifier, Map.of(
+                    "usertype", identifier.endsWith(":admin_user") ? "admin_user" : "user"
+            ));
+            
+            log.info("Generated new access token: {}...", access.substring(0, 50));
+            log.info("=== REFRESH TOKEN SUCCESS ===");
+            
+            return Refresh.RefreshResponseDTO.builder().accessToken(access).build();
+            
+        } catch (Exception e) {
+            log.error("=== REFRESH TOKEN ERROR ===");
+            log.error("Error: {}", e.getMessage(), e);
+            throw e;
         }
-
-        // Build identifier used by JwtService and UserDetailsService
-        String identifier;
-        if (rt.getAdminUser() != null) {
-            identifier = rt.getAdminUser().getUsername() + ":admin_user";
-        } else {
-            identifier = rt.getUsers().getUsername() + ":user";
-        }
-
-        String access = jwtService.generateAccessToken(identifier, Map.of(
-                "usertype", identifier.endsWith(":admin_user") ? "admin_user" : "user"
-        ));
-        return Refresh.RefreshResponseDTO.builder().accessToken(access).build();
     }
 }

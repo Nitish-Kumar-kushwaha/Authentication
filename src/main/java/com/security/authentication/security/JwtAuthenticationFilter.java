@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +16,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -44,21 +46,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
+        log.debug("Processing JWT token for request: {} {}", request.getMethod(), request.getRequestURI());
 
-        if (!jwtService.isValidAndNotRevoked(token)) {
+        try {
+            // Check if token is valid and not revoked
+            if (!jwtService.isValidAndNotRevoked(token)) {
+                log.debug("JWT token validation failed for request: {} {}", request.getMethod(), request.getRequestURI());
+                // Token is invalid or expired - return 401 Unauthorized
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Token expired or invalid\",\"code\":\"TOKEN_EXPIRED\"}");
+                return;
+            }
+
+            String subject = jwtService.getSubject(token);
+            CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(subject);
+            Authentication authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            log.debug("JWT authentication successful for user: {}", subject);
             filterChain.doFilter(request, response);
-            return;
+            
+        } catch (Exception e) {
+            log.error("JWT token validation error for request: {} {}: {}", 
+                     request.getMethod(), request.getRequestURI(), e.getMessage(), e);
+            // Handle any errors during token validation
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Token validation failed\",\"code\":\"TOKEN_INVALID\"}");
         }
-
-        String subject = jwtService.getSubject(token);
-        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(subject);
-        Authentication authToken = new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities()
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        filterChain.doFilter(request, response);
     }
 }
